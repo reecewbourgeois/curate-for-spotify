@@ -7,5 +7,5 @@ export default defineConfig({
     ...tanstackConfig.ignorePatterns,
     // Custom ignore patterns go here
   ],
-  singleAttributePerLine: true
+  singleAttributePerLine: true,
 })
