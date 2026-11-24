@@ -1,179 +1,58 @@
-Welcome to your new TanStack Start app!
+# Curate for Spotify
 
-# Getting Started
+An open-source, client-only Spotify playlist builder. Pick any source playlist (or Liked Songs) and any target playlist, listen through your queue at your own pace, add favorites straight to your target, or skip tracks for later. Curate remembers every source-to-target pairing and every song you have added, played, or skipped—even when shuffle is turned on.
 
-To run this application:
+## Features
 
-```bash
-pnpm install
-pnpm dev
-```
+- **Per-pair progress memory**: Switch between pairings (e.g., _Liked Songs → Driving_, _Liked Songs → Focus_) without losing your place.
+- **Direct playlist adds & Undo**: Add songs directly to your target playlist via Spotify's `/playlists/{id}/items` endpoint. Undoing an add removes the track from the target playlist and puts it back in Remaining.
+- **Tracked shuffle**: Shuffle your remaining queue while still tracking every reviewed track.
+- **Resilient Spotify playback sync**: Uses `GET /me/player` with fallback to `currently-playing`, retry/backoff on transient drops and `429` rate limits, visibility-aware re-sync, interactive seeking, and active device discovery.
+- **Local-first & static**: Runs completely in your browser with PKCE OAuth (no backend, no Client Secret). Export or import your local progress as JSON anytime.
 
-# Building For Production
+## Local Development
 
-To build this application for production:
+1. **Create a Spotify Developer App**:
+   - Open the [Spotify Developer Dashboard](https://developer.spotify.com/dashboard) and create an app with **Web API** enabled.
+   - Add `http://127.0.0.1:3000/` (including the trailing slash) as a Redirect URI.
+   - Copy your app's **Client ID**.
 
-```bash
-pnpm build
-```
+2. **Configure environment variables** (optional—you can also paste your Client ID in the UI):
 
-## Styling
+   ```bash
+   cp .env.example .env
+   ```
 
-This project uses [Tailwind CSS](https://tailwindcss.com/) for styling.
+   Set `VITE_SPOTIFY_CLIENT_ID` and `VITE_SPOTIFY_REDIRECT_URI=http://127.0.0.1:3000/`.
 
-### Removing Tailwind CSS
+3. **Install and run**:
+   ```bash
+   pnpm install
+   pnpm dev
+   ```
+   Open `http://127.0.0.1:3000/` in your browser (Spotify does not accept `http://localhost` as a redirect URI).
 
-If you prefer not to use Tailwind CSS:
+## Spotify OAuth Scopes
 
-1. Remove the demo pages in `src/routes/demo/`
-2. Replace the Tailwind import in `src/styles.css` with your own styles
-3. Remove `tailwindcss()` from the plugins array in `vite.config.ts`
-4. Remove `@tailwindcss/vite` and `tailwindcss` from `package.json`
+Curate requests the following scopes via Authorization Code with PKCE:
 
-## Routing
+- `user-read-private`
+- `user-library-read`
+- `playlist-read-private`, `playlist-read-collaborative`
+- `playlist-modify-public`, `playlist-modify-private`
+- `user-read-playback-state`, `user-read-currently-playing`, `user-modify-playback-state`
 
-This project uses [TanStack Router](https://tanstack.com/router) with file-based routing. Routes are managed as files in `src/routes`.
+## Scripts
 
-### Adding A Route
+- `pnpm dev` — start local dev server on port 3000
+- `pnpm build` — production build (`dist/` includes `404.html` SPA fallback for GitHub Pages)
+- `pnpm lint` — run `oxlint`
+- `pnpm fmt` — format with `oxfmt`
 
-To add a new route to your application just add a new file in the `./src/routes` directory.
+## Deploying to GitHub Pages
 
-TanStack will automatically generate the content of the route file for you.
+A GitHub Actions workflow is included at `.github/workflows/deploy.yml`.
 
-Now that you have two routes you can use a `Link` component to navigate between them.
-
-### Adding Links
-
-To use SPA (Single Page Application) navigation you will need to import the `Link` component from `@tanstack/react-router`.
-
-```tsx
-import { Link } from '@tanstack/react-router'
-```
-
-Then anywhere in your JSX you can use it like so:
-
-```tsx
-<Link to="/about">About</Link>
-```
-
-This will create a link that will navigate to the `/about` route.
-
-More information on the `Link` component can be found in the [Link documentation](https://tanstack.com/router/v1/docs/framework/react/api/router/linkComponent).
-
-### Using A Layout
-
-In the File Based Routing setup the layout is located in `src/routes/__root.tsx`. Anything you add to the root route will appear in all the routes. The route content will appear in the JSX where you render `{children}` in the `shellComponent`.
-
-Here is an example layout that includes a header:
-
-```tsx
-import { HeadContent, Scripts, createRootRoute } from '@tanstack/react-router'
-
-export const Route = createRootRoute({
-  head: () => ({
-    meta: [
-      { charSet: 'utf-8' },
-      { name: 'viewport', content: 'width=device-width, initial-scale=1' },
-      { title: 'My App' },
-    ],
-  }),
-  shellComponent: ({ children }) => (
-    <html lang="en">
-      <head>
-        <HeadContent />
-      </head>
-      <body>
-        <header>
-          <nav>
-            <Link to="/">Home</Link>
-            <Link to="/about">About</Link>
-          </nav>
-        </header>
-        {children}
-        <Scripts />
-      </body>
-    </html>
-  ),
-})
-```
-
-More information on layouts can be found in the [Layouts documentation](https://tanstack.com/router/latest/docs/framework/react/guide/routing-concepts#layouts).
-
-## Server Functions
-
-TanStack Start provides server functions that allow you to write server-side code that seamlessly integrates with your client components.
-
-```tsx
-import { createServerFn } from '@tanstack/react-start'
-
-const getServerTime = createServerFn({
-  method: 'GET',
-}).handler(async () => {
-  return new Date().toISOString()
-})
-
-// Use in a component
-function MyComponent() {
-  const [time, setTime] = useState('')
-
-  useEffect(() => {
-    getServerTime().then(setTime)
-  }, [])
-
-  return <div>Server time: {time}</div>
-}
-```
-
-## API Routes
-
-You can create API routes by using the `server` property in your route definitions:
-
-```tsx
-import { createFileRoute } from '@tanstack/react-router'
-import { json } from '@tanstack/react-start'
-
-export const Route = createFileRoute('/api/hello')({
-  server: {
-    handlers: {
-      GET: () => json({ message: 'Hello, World!' }),
-    },
-  },
-})
-```
-
-## Data Fetching
-
-There are multiple ways to fetch data in your application. You can use TanStack Query to fetch data from a server. But you can also use the `loader` functionality built into TanStack Router to load the data for a route before it's rendered.
-
-For example:
-
-```tsx
-import { createFileRoute } from '@tanstack/react-router'
-
-export const Route = createFileRoute('/people')({
-  loader: async () => {
-    const response = await fetch('https://swapi.dev/api/people')
-    return response.json()
-  },
-  component: PeopleComponent,
-})
-
-function PeopleComponent() {
-  const data = Route.useLoaderData()
-  return (
-    <ul>
-      {data.results.map((person) => (
-        <li key={person.name}>{person.name}</li>
-      ))}
-    </ul>
-  )
-}
-```
-
-Loaders simplify your data fetching logic dramatically. Check out more information in the [Loader documentation](https://tanstack.com/router/latest/docs/framework/react/guide/data-loading#loader-parameters).
-
-# Learn More
-
-You can learn more about all of the offerings from TanStack in the [TanStack documentation](https://tanstack.com).
-
-For TanStack Start specific documentation, visit [TanStack Start](https://tanstack.com/start).
+1. Enable **Settings → Pages → Source: GitHub Actions** in your repository.
+2. Add your deployed URL (e.g. `https://<username>.github.io/<repo>/`) as a Redirect URI in your Spotify Developer App.
+3. Push to `main` to build and deploy.
