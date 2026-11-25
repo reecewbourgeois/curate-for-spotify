@@ -414,7 +414,7 @@ export function PairModals({
           </button>
           <p className="modal-footnote">
             Disconnecting clears your session tokens, not your saved local
-            decisions or Client ID.
+            decisions.
           </p>
         </>
       ) : null}

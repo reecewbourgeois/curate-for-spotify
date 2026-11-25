@@ -7,7 +7,7 @@ import { QueuePanel } from '../components/QueuePanel'
 import { useToast } from '../components/Toast'
 import {
   AuthorizationRequired,
-  getSavedClientId,
+  getConfiguredClientId,
   startSpotifyAuth,
 } from '../lib/auth'
 import { PlaybackController } from '../lib/playback'
@@ -74,7 +74,7 @@ export const Route = createFileRoute('/curate')({
   }),
   beforeLoad: () => {
     if (!spotifySession.isAuthenticated) {
-      throw redirect({ to: '/setup', replace: true })
+      throw redirect({ to: '/', replace: true })
     }
   },
   loader: async ({ abortController }) => {
@@ -88,8 +88,8 @@ export const Route = createFileRoute('/curate')({
       if (error instanceof AuthorizationRequired) {
         spotifySession.disconnect()
         throw redirect({
-          to: '/setup',
-          search: { error: error.message },
+          to: '/',
+          search: { authError: error.message },
           replace: true,
         })
       }
@@ -286,8 +286,8 @@ function CuratePage() {
     (reason: string) => {
       spotifySession.disconnect()
       void navigate({
-        to: '/setup',
-        search: { error: reason },
+        to: '/',
+        search: { authError: reason },
         replace: true,
       })
     },
@@ -789,17 +789,17 @@ function CuratePage() {
     controllerRef.current?.stop()
     spotifySession.disconnect()
     showToast('Disconnected. Your local progress is safe.')
-    void navigate({ to: '/setup', replace: true })
+    void navigate({ to: '/', replace: true })
   }, [navigate, showToast])
 
   const handleReauthorizeForWrite = useCallback(async () => {
-    const clientId = getSavedClientId()
+    const clientId = getConfiguredClientId()
     if (!clientId) {
       handleDisconnect()
       return
     }
     try {
-      await startSpotifyAuth(clientId, { showDialog: true })
+      await startSpotifyAuth({ clientId, showDialog: true })
     } catch (error) {
       handleError(error)
     }

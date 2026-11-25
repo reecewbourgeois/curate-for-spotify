@@ -4,7 +4,6 @@ import { FetchHttpClient, HttpClient, HttpClientRequest } from 'effect/http'
 const TOKEN_URL = 'https://accounts.spotify.com/api/token'
 const AUTHORIZE_URL = 'https://accounts.spotify.com/authorize'
 
-const CLIENT_ID_KEY = 'curate:clientId'
 const TOKEN_KEY = 'curate:session:v1'
 const PKCE_KEY = 'curate:pkce:v1'
 
@@ -119,35 +118,10 @@ export function getValidatedRedirectUri(): string {
   return uri.href
 }
 
-export function getSavedClientId(): string {
-  try {
-    const saved = localStorage.getItem(CLIENT_ID_KEY)
-    if (saved) return saved
-  } catch {
-    // Fall back to sessionStorage or env.
-  }
-  try {
-    const saved = sessionStorage.getItem(CLIENT_ID_KEY)
-    if (saved) return saved
-  } catch {
-    // Fall back to env.
-  }
+export function getConfiguredClientId(): string {
   return (
     (import.meta.env.VITE_SPOTIFY_CLIENT_ID as string | undefined)?.trim() || ''
   )
-}
-
-export function saveClientId(clientId: string): void {
-  try {
-    sessionStorage.setItem(CLIENT_ID_KEY, clientId)
-  } catch {
-    // Ignore storage restriction.
-  }
-  try {
-    localStorage.setItem(CLIENT_ID_KEY, clientId)
-  } catch {
-    // Ignore storage restriction.
-  }
 }
 
 export function loadStoredToken(): AuthToken | null {
@@ -200,14 +174,14 @@ export function hasPendingCallback(search: string): boolean {
   return params.has('code') || params.has('error')
 }
 
-export async function startSpotifyAuth(
-  clientId: string,
-  options?: { readonly showDialog?: boolean },
-): Promise<void> {
-  const trimmed = clientId.trim()
+export async function startSpotifyAuth(options?: {
+  readonly clientId?: string
+  readonly showDialog?: boolean
+}): Promise<void> {
+  const trimmed = (options?.clientId ?? getConfiguredClientId()).trim()
   if (!/^[a-zA-Z0-9]{32}$/.test(trimmed)) {
     throw new Error(
-      'Enter the 32-character Client ID from your Spotify developer app. Do not enter a Client Secret.',
+      'Spotify sign-in is not configured for this deployment. Set VITE_SPOTIFY_CLIENT_ID to a valid 32-character Spotify Client ID.',
     )
   }
   const redirect = getValidatedRedirectUri()
@@ -223,7 +197,6 @@ export async function startSpotifyAuth(
     .replace(/\//g, '_')
 
   const scopeString = SPOTIFY_SCOPES.join(' ')
-  saveClientId(trimmed)
 
   const pending: PendingPkce = {
     clientId: trimmed,

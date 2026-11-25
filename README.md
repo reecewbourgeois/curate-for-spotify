@@ -2,6 +2,8 @@
 
 An open-source, client-only Spotify playlist builder. Pick any source playlist (or Liked Songs) and any target playlist, listen through your queue at your own pace, add favorites straight to your target, or skip tracks for later. Curate remembers every source-to-target pairing and every song you have added, played, or skipped—even when shuffle is turned on.
 
+**Note: You will need premium for some features based on Spotify's API requirements.**
+
 ## Features
 
 - **Per-pair progress memory**: Switch between pairings (e.g., _Liked Songs → Driving_, _Liked Songs → Focus_) without losing your place.
@@ -17,7 +19,7 @@ An open-source, client-only Spotify playlist builder. Pick any source playlist (
    - Add `http://127.0.0.1:3000/` (including the trailing slash) as a Redirect URI.
    - Copy your app's **Client ID**.
 
-2. **Configure environment variables** (optional—you can also paste your Client ID in the UI):
+2. **Configure environment variables**:
 
    ```bash
    cp .env.example .env
@@ -41,18 +43,3 @@ Curate requests the following scopes via Authorization Code with PKCE:
 - `playlist-read-private`, `playlist-read-collaborative`
 - `playlist-modify-public`, `playlist-modify-private`
 - `user-read-playback-state`, `user-read-currently-playing`, `user-modify-playback-state`
-
-## Scripts
-
-- `pnpm dev` — start local dev server on port 3000
-- `pnpm build` — production build (`dist/` includes `404.html` SPA fallback for GitHub Pages)
-- `pnpm lint` — run `oxlint`
-- `pnpm fmt` — format with `oxfmt`
-
-## Deploying to GitHub Pages
-
-A GitHub Actions workflow is included at `.github/workflows/deploy.yml`.
-
-1. Enable **Settings → Pages → Source: GitHub Actions** in your repository.
-2. Add your deployed URL (e.g. `https://<username>.github.io/<repo>/`) as a Redirect URI in your Spotify Developer App.
-3. Push to `main` to build and deploy.

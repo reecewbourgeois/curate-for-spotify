@@ -83,8 +83,8 @@ function RootErrorComponent({ error, reset }: ErrorComponentProps) {
             onClick={() => {
               spotifySession.disconnect()
               void router.navigate({
-                to: '/setup',
-                search: { error: isAuthError ? message : undefined },
+                to: '/',
+                search: { authError: isAuthError ? message : undefined },
                 replace: true,
               })
             }}
