@@ -27,7 +27,7 @@ jobs:
       - run: pnpm lint
       - run: pnpm build
         env:
-          # VITE_BASE_PATH: /${{ github.event.repository.name }}/
+          VITE_BASE_PATH: /${{ github.event.repository.name }}/
           VITE_SPOTIFY_CLIENT_ID: ${{ env.VITE_SPOTIFY_CLIENT_ID }}
       - uses: actions/upload-pages-artifact@v4
         with:
